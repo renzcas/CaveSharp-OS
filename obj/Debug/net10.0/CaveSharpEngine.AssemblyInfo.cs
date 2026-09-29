@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CaveSharpEngine")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+33e9030ab231e747d9c2a6083e47ca6706126dfd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+25dc289681284a01f501e04cf7725a9e3786b584")]
 [assembly: System.Reflection.AssemblyProductAttribute("CaveSharpEngine")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CaveSharpEngine")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -7,22 +7,28 @@ namespace CaveSharp.Core
     {
         private bool _isRunning = false;
         private int _tickRate = 60;
-        private CTABoss _boss;
-        private WeatherSystem _weather;
+
+        // CTA Subsystems
+        private CTAEvolutionEngine _ctaEvolution = new();
+        private CTAEventEngine _ctaEvents = new();
+
+        // Realm Subsystems
+        private WeatherSystem _weather = new();
+        private HealingMap _healing = new();
 
         public UpdateLoop()
         {
-            _boss = new CTABoss { Name = "Overlord-Alpha", CommandPower = 850 };
-            _weather = new WeatherSystem();
+            // Register one corruption organism for now
+            _ctaEvolution.Register(new CTAEntity("CorruptionNode-01"));
         }
 
         public void Start()
         {
             _isRunning = true;
             Console.WriteLine("[*] CaveSharp-OS Core Engine Initialized with CTA & Realm Subsystems.");
-            
+
             int tickCount = 0;
-            while (_isRunning && tickCount < 2)
+            while (_isRunning && tickCount < 5)
             {
                 Tick();
                 tickCount++;
@@ -33,8 +39,14 @@ namespace CaveSharp.Core
         private void Tick()
         {
             Console.WriteLine($"\n[Tick] Engine state updated at {DateTime.UtcNow}");
-            _boss.ExecuteTacticalDirective();
-            _weather.ShiftClimate();
+
+            // CTA Systems
+            _ctaEvolution.Tick();
+            _ctaEvents.Tick();
+
+            // Realm Systems
+            _weather.Tick();
+            _healing.Tick();
         }
     }
 }
