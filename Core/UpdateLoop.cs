@@ -1,3 +1,5 @@
+using System;
+using System.Threading;
 using CaveSharp.CTA;
 using CaveSharp.Realm;
 
@@ -11,13 +13,17 @@ namespace CaveSharp.Core
         // CTA Subsystems
         private CTAEvolutionEngine _ctaEvolution = new();
         private CTAEventEngine _ctaEvents = new();
+        private CTABoss _boss;
 
         // Realm Subsystems
         private WeatherSystem _weather = new();
         private HealingMap _healing = new();
+        private CorruptionMap _corruption = new();
 
         public UpdateLoop()
         {
+            _boss = new CTABoss("Overlord-Alpha", 850);
+
             // Register one corruption organism for now
             _ctaEvolution.Register(new CTAEntity("CorruptionNode-01"));
         }
@@ -43,10 +49,12 @@ namespace CaveSharp.Core
             // CTA Systems
             _ctaEvolution.Tick();
             _ctaEvents.Tick();
+            _boss.ExecuteTacticalDirective();
 
             // Realm Systems
             _weather.Tick();
             _healing.Tick();
+            _corruption.Tick();
         }
     }
 }
