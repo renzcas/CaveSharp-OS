@@ -1,15 +1,36 @@
+using System;
+
 namespace CaveSharp.Realm
 {
+    public enum WeatherType
+    {
+        Clear,
+        Rain,
+        Storm,
+        Fog,
+        Heatwave
+    }
+
     public class WeatherSystem
     {
-        public string CurrentClimate { get; set; } = "Void-Mist";
-        public double AmbientPressure { get; set; } = 104.5;
+        public WeatherType CurrentWeather { get; private set; } = WeatherType.Clear;
 
-        public void ShiftClimate()
+        public void Tick()
         {
-            CurrentClimate = "Quantum-Storm";
-            AmbientPressure += 12.3;
-            Console.WriteLine($"[Realm] Weather shift detected. Climate: {CurrentClimate}, Pressure: {AmbientPressure}kPa");
+            int roll = Random.Shared.Next(0, 100);
+
+            if (roll < 60)
+                CurrentWeather = WeatherType.Clear;
+            else if (roll < 75)
+                CurrentWeather = WeatherType.Rain;
+            else if (roll < 85)
+                CurrentWeather = WeatherType.Fog;
+            else if (roll < 95)
+                CurrentWeather = WeatherType.Storm;
+            else
+                CurrentWeather = WeatherType.Heatwave;
+
+            Console.WriteLine($"[Realm Weather] Current weather: {CurrentWeather}");
         }
     }
 }
