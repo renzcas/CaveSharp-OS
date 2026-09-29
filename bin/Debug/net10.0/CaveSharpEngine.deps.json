@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "CaveSharpEngine/1.0.0": {
+        "runtime": {
+          "CaveSharpEngine.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "CaveSharpEngine/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
