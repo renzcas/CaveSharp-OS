@@ -7,7 +7,6 @@ namespace CaveSharpOS.Systems.Combat
     {
         public void Tick(Creature creature, IReadOnlyList<Creature> allCreatures)
         {
-            // Placeholder combat logic
         }
     }
 }

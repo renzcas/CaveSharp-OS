@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CaveSharpOS.Systems.Combat;
 
 namespace CaveSharp.Creatures
 {
@@ -36,19 +37,10 @@ namespace CaveSharp.Creatures
         {
             foreach (var creature in _creatures)
             {
-                // Biological update
                 creature.Tick();
-
-                // AI decision-making
                 _behavior.Tick(creature);
-
-                // Movement + spatial reaction
                 _movement.Tick(creature);
-
-                // Sensory perception
                 _senses.Tick(creature, _creatures);
-
-                // Combat interactions
                 _combat.Tick(creature, _creatures);
             }
         }
