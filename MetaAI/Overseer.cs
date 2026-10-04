@@ -1,8 +1,10 @@
 using System;
+using System.Threading.Tasks;
 using CaveSharp.CTA;
 using CaveSharp.Realm;
 using CaveSharp.Creatures;
 using CaveSharp.Factions;
+using CaveSharp.Telemetry;
 
 namespace CaveSharp.MetaAI
 {
@@ -14,6 +16,10 @@ namespace CaveSharp.MetaAI
         private readonly NonLinearJunctionDetector _junctions;
         private readonly CreatureManager _creatures;
         private readonly FactionEngine _factions;
+
+        private readonly CyberDefenseAgent _defense;
+        private readonly WebSocketServer _telemetry;
+        private readonly CTACommandServer _ctaCommands;
 
         public int GlobalThreatLevel { get; private set; } = 0;
 
@@ -31,6 +37,14 @@ namespace CaveSharp.MetaAI
             _junctions = junctions;
             _creatures = creatures;
             _factions = factions;
+
+            _defense = new CyberDefenseAgent();
+
+            _telemetry = new WebSocketServer();
+            _ = _telemetry.Start();
+
+            _ctaCommands = new CTACommandServer(this);
+            _ = _ctaCommands.Start();
         }
 
         public void Tick()
@@ -56,6 +70,13 @@ namespace CaveSharp.MetaAI
             Console.WriteLine($"[Overseer] GlobalThreatLevel={GlobalThreatLevel}");
 
             AdjustWorldParameters();
+
+            // Defense agent
+            _defense.Decay(0.1f);
+            _defense.AnalyzeLog("unauthorized access attempt");
+
+            // Broadcast telemetry
+            _ = BroadcastState();
         }
 
         private int CountLowHealthCreatures()
@@ -92,6 +113,52 @@ namespace CaveSharp.MetaAI
             {
                 Console.WriteLine("[Overseer] *** WORLD CRISIS THRESHOLD REACHED ***");
             }
+        }
+
+        public async Task BroadcastState()
+        {
+            var creatureSnapshot = _creatures.GetSnapshot();
+            var corruptionGrid = _corruption.GetGrid();
+
+            string json = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                threat = GlobalThreatLevel,
+                cta = _boss.AggressionLevel,
+                corruption = _corruption.SpreadIntensity,
+                creatures = creatureSnapshot,
+                ctaBoss = _boss.Name,
+                directive = GetDirective(),
+                corruptionGrid = corruptionGrid
+            });
+
+            await _telemetry.SendToAll(json);
+        }
+
+        private string GetDirective()
+        {
+            if (_boss.AggressionLevel > 50)
+                return "Deploy pressure units";
+
+            return "Monitor corruption nodes";
+        }
+
+        // === CTA COMMAND HOOKS ===
+
+        public void IncreaseCTA(float amount)
+        {
+            _boss.IncreaseAggression(amount);
+            Console.WriteLine($"[Overseer] CTA increased by {amount}");
+        }
+
+        public void CooldownCTA(float amount)
+        {
+            _boss.CoolDown(amount);
+            Console.WriteLine($"[Overseer] CTA cooled by {amount}");
+        }
+
+        public void SetCTADirective(string directive)
+        {
+            Console.WriteLine($"[Overseer] Directive received: {directive}");
         }
     }
 }
