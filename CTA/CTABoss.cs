@@ -1,26 +1,23 @@
-using System;
-
-namespace CaveSharp.CTA
+namespace CaveSharpOS.CTA
 {
     public class CTABoss
     {
-        public string Name { get; private set; }
-        public int CommandPower { get; private set; }
+        // Overseer expects this property
+        public float AggressionLevel { get; private set; } = 0f;
 
-        private CTAEntity _coreNode;
-
-        public CTABoss(string name, int commandPower)
+        // Overseer expects this method
+        public void IncreaseAggression(float amount)
         {
-            Name = name;
-            CommandPower = commandPower;
-
-            // Boss creates a core corruption node
-            _coreNode = new CTAEntity($"{name}-Core");
+            AggressionLevel += amount;
         }
 
-        public void ExecuteTacticalDirective()
+        // Overseer expects this method
+        public void CoolDown(float dt)
         {
-            Console.WriteLine($"[CTABoss] {Name} issuing directive. CommandPower={CommandPower}");
+            AggressionLevel -= dt * 0.05f;
+
+            if (AggressionLevel < 0)
+                AggressionLevel = 0;
         }
     }
 }
