@@ -32,6 +32,27 @@ namespace CaveSharp.Realm
         }
 
         /// <summary>
+        /// Called by UpdateLoop.cs
+        /// </summary>
+        public void Spread()
+        {
+            // SpreadIntensity rises slowly over time
+            SpreadIntensity += 1;
+            if (SpreadIntensity > 100)
+                SpreadIntensity = 100;
+
+            // Random corruption spike in the grid
+            int x = _rng.Next(_width);
+            int y = _rng.Next(_height);
+
+            _grid[x, y] += Pressure * 0.3f;
+            if (_grid[x, y] > 100f)
+                _grid[x, y] = 100f;
+
+            Console.WriteLine($"[Realm Corruption] Spread event. Intensity={SpreadIntensity}, Pressure={Pressure}");
+        }
+
+        /// <summary>
         /// Overseer calls this every tick.
         /// </summary>
         public void Decay(float dt)
@@ -68,7 +89,8 @@ namespace CaveSharp.Realm
             int y = _rng.Next(_height);
 
             _grid[x, y] += Pressure * 0.5f;
-            if (_grid[x, y] > 100f) _grid[x, y] = 100f;
+            if (_grid[x, y] > 100f)
+                _grid[x, y] = 100f;
         }
 
         /// <summary>

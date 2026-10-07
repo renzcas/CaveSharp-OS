@@ -7,11 +7,16 @@ namespace CaveSharp.CTA
     {
         private readonly List<CTAEntity> _entities = new();
 
+        public int TotalOrganisms => _entities.Count;
+
         public void Register(CTAEntity entity)
         {
             _entities.Add(entity);
         }
 
+        /// <summary>
+        /// Called by UpdateLoop.cs
+        /// </summary>
         public void Tick()
         {
             foreach (var entity in _entities)
@@ -24,6 +29,11 @@ namespace CaveSharp.CTA
 
                 Console.WriteLine($"[CTA Evolution] {entity.Name} corruption +{corruptionGain}");
             }
+        }
+
+        public IEnumerable<CTAEntity> GetAll()
+        {
+            return _entities;
         }
     }
 }

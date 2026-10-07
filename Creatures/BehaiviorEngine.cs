@@ -1,48 +1,45 @@
 using System;
-using CaveSharp.Realm;
+using System.Collections.Generic;
 
 namespace CaveSharp.Creatures
 {
+    /// <summary>
+    /// Handles creature decision-making:
+    /// fear, hunger-driven aggression, corruption panic,
+    /// and basic behavioral state transitions.
+    /// </summary>
     public class BehaviorEngine
     {
-        private readonly CorruptionMap _corruption;
-        private readonly NonLinearJunctionDetector _junctions;
-
-        public BehaviorEngine(CorruptionMap corruption, NonLinearJunctionDetector junctions)
-        {
-            _corruption = corruption;
-            _junctions = junctions;
-        }
-
         public void Tick(Creature creature)
         {
-            if (creature.Health <= 0)
-                return;
-
-            // Fear from corruption
-            if (_corruption.SpreadIntensity > 5 && Random.Shared.Next(0, 100) > 60)
+            // Hunger → aggression
+            if (creature.Hunger > 70)
             {
-                creature.BecomeAfraid("corruption spreading");
+                creature.IncreaseAggression(2);
             }
 
-            // Fear from junction anomalies
-            if (_junctions.JunctionOpen && Random.Shared.Next(0, 100) > 40)
+            // Corruption → fear
+            if (creature.CorruptionExposure > 40 && !creature.IsAfraid)
             {
-                creature.BecomeAfraid("dimensional instability");
+                creature.BecomeAfraid("Corruption exposure");
             }
 
-            // Behavior decisions
-            if (creature.IsAfraid)
+            // Low health → fear
+            if (creature.Health < 30 && !creature.IsAfraid)
             {
-                Console.WriteLine($"[Behavior] {creature.Name} flees deeper into the cave.");
+                creature.BecomeAfraid("Critical health");
             }
-            else if (creature.Hunger > 50)
+
+            // Aggression spikes → reckless behavior
+            if (creature.Aggression > 60)
             {
-                Console.WriteLine($"[Behavior] {creature.Name} searches for food.");
+                Console.WriteLine($"[BehaviorEngine] {creature.Name} enters a reckless state.");
             }
-            else
+
+            // Calm down slowly if safe
+            if (creature.Aggression < 10 && creature.IsAfraid == false)
             {
-                Console.WriteLine($"[Behavior] {creature.Name} wanders calmly.");
+                // mild natural calm
             }
         }
     }

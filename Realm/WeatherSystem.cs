@@ -15,7 +15,7 @@ namespace CaveSharp.Realm
     {
         public WeatherType CurrentWeather { get; private set; } = WeatherType.Clear;
 
-        public void Tick()
+        public void ShiftClimate()
         {
             int roll = Random.Shared.Next(0, 100);
 

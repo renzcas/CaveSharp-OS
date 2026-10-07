@@ -47,7 +47,10 @@ namespace CaveSharp.MetaAI
             _ = _ctaCommands.Start();
         }
 
-        public void Tick()
+        /// <summary>
+        /// Called by UpdateLoop.cs
+        /// </summary>
+        public void Process()
         {
             int threat = 0;
 

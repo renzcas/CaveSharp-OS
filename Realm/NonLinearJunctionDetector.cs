@@ -7,24 +7,29 @@ namespace CaveSharp.Realm
         public int AnomalyLevel { get; private set; } = 0;
         public bool JunctionOpen { get; private set; } = false;
 
-        public void Tick()
+        private readonly Random _rng = new Random();
+
+        /// <summary>
+        /// Called by UpdateLoop.cs
+        /// </summary>
+        public void Scan()
         {
-            int roll = Random.Shared.Next(0, 100);
+            int roll = _rng.Next(0, 100);
 
             // Small fluctuations
             if (roll < 50)
             {
-                AnomalyLevel += Random.Shared.Next(0, 2);
+                AnomalyLevel += _rng.Next(0, 2);
             }
             // Medium spikes
             else if (roll < 80)
             {
-                AnomalyLevel += Random.Shared.Next(1, 4);
+                AnomalyLevel += _rng.Next(1, 4);
             }
             // Rare major distortion
             else
             {
-                AnomalyLevel += Random.Shared.Next(3, 8);
+                AnomalyLevel += _rng.Next(3, 8);
                 Console.WriteLine("[Realm Junction] *** MAJOR distortion detected ***");
             }
 

@@ -1,14 +1,12 @@
-using CaveSharpOS.Systems.Combat;
 using System;
 using System.Threading;
+using CaveSharp.Systems.Combat;
 using CaveSharp.CTA;
 using CaveSharp.Realm;
 using CaveSharp.Creatures;
 using CaveSharp.Factions;
 using CaveSharp.MetaAI;
 using CaveSharp.WebUI;
-
-
 
 namespace CaveSharp.Core
 {
@@ -20,7 +18,7 @@ namespace CaveSharp.Core
         // CTA Subsystems
         private readonly CTAEvolutionEngine _ctaEvolution = new();
         private readonly CTAEventEngine _ctaEvents = new();
-        private readonly CTABoss _boss = new("Overlord-Alpha", 850);
+        private readonly CTABoss _boss = new("Overlord-Alpha", 0f, 850);
 
         // Realm Subsystems
         private readonly WeatherSystem _weather = new();
@@ -114,29 +112,31 @@ namespace CaveSharp.Core
         {
             Console.WriteLine($"\n[Tick] Engine state updated at {DateTime.UtcNow}");
 
-            // CTA Systems
-            _ctaEvolution.Tick();
-            _ctaEvents.Tick();
-            _boss.ExecuteTacticalDirective();
+            float dt = 1f / _tickRate;
 
-            // Realm Systems
-            _weather.Tick();
-            _healing.Tick();
-            _corruption.Tick();
-            _junctions.Tick();
-            _rifts.Tick();
+            // CTA Systems (no Tick() methods in your real classes)
+            // Use AutoDirective() instead of ExecuteTacticalDirective()
+            string directive = _boss.AutoDirective();
+            Console.WriteLine($"[CTA] Boss directive: {directive}");
+
+            // Realm Systems (your real classes do not have Tick())
+            _weather.ShiftClimate();
+            _healing.ApplyHealing();
+            _corruption.Spread();
+            _junctions.Scan();
+            _rifts.Update();
 
             // Creatures
-            _creatures.Tick();
+            _creatures.Tick(dt);
 
-            // Factions
-            _factions.Tick();
+            // Factions (your real FactionEngine does not have Tick())
+            _factions.ProcessFactionLogic();
 
-            // MetaAI Overseer
-            _overseer.Tick();
+            // MetaAI Overseer (your real Overseer does not have Tick())
+            _overseer.Process();
 
-            // WebUI Heartbeat
-            _heartbeat.Tick();
+            // WebUI Heartbeat (your real HeartbeatPanel does not have Tick())
+            _heartbeat.Refresh();
         }
     }
 }

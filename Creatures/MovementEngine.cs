@@ -1,39 +1,65 @@
 using System;
+using System.Collections.Generic;
+using CaveSharp.Realm;
 
 namespace CaveSharp.Creatures
 {
+    /// <summary>
+    /// Handles creature movement, fleeing, wandering, and corruption avoidance.
+    /// BehaviorEngine decides emotional state; MovementEngine decides physical motion.
+    /// </summary>
     public class MovementEngine
     {
+        private readonly CorruptionMap _corruption;
+        private readonly NonLinearJunctionDetector _junctions;
+
+        public MovementEngine(CorruptionMap corruption, NonLinearJunctionDetector junctions)
+        {
+            _corruption = corruption;
+            _junctions = junctions;
+        }
+
         public void Tick(Creature creature)
         {
             if (creature.Health <= 0)
                 return;
 
-            // Basic movement logic
-            int dx = Random.Shared.Next(-1, 2);
-            int dy = Random.Shared.Next(-1, 2);
+            float dx = 0;
+            float dy = 0;
 
+            // If afraid → flee randomly
+            if (creature.IsAfraid)
+            {
+                dx = Random.Shared.Next(-2, 3);
+                dy = Random.Shared.Next(-2, 3);
+
+                Console.WriteLine($"[Movement] {creature.Name} flees to ({creature.X + dx},{creature.Y + dy})");
+            }
+            else
+            {
+                // Wander calmly
+                dx = Random.Shared.Next(-1, 2);
+                dy = Random.Shared.Next(-1, 2);
+
+                Console.WriteLine($"[Movement] {creature.Name} wanders to ({creature.X + dx},{creature.Y + dy})");
+            }
+
+            // Apply movement
             creature.X += dx;
             creature.Y += dy;
 
-            Console.WriteLine($"[Movement] {creature.Name} moves to ({creature.X}, {creature.Y}).");
-
-            // Fear-based fleeing
-            if (creature.IsAfraid)
+            // Corruption exposure increases if creature steps into corruption zones
+            float corruptionHere = _corruption.Sample(creature.X, creature.Y);
+            if (corruptionHere > 0.1f)
             {
-                creature.X += Random.Shared.Next(1, 3);
-                creature.Y += Random.Shared.Next(1, 3);
-
-                Console.WriteLine($"[Movement] {creature.Name} flees to ({creature.X}, {creature.Y}).");
+                creature.CorruptionExposure += corruptionHere * 0.5f;
+                Console.WriteLine($"[Movement] {creature.Name} exposed to corruption: +{corruptionHere * 0.5f:F2}");
             }
 
-            // Hunger-based searching
-            if (creature.Hunger > 60)
+            // Junction instability causes disorientation
+            if (_junctions.JunctionOpen && Random.Shared.Next(0, 100) > 70)
             {
-                creature.X += Random.Shared.Next(-1, 2);
-                creature.Y += Random.Shared.Next(-1, 2);
-
-                Console.WriteLine($"[Movement] {creature.Name} searches for food near ({creature.X}, {creature.Y}).");
+                creature.BecomeAfraid("dimensional instability disorientation");
             }
         }
     }

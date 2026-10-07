@@ -5,31 +5,40 @@ namespace CaveSharp.Realm
     public class SpatialRiftEngine
     {
         private readonly NonLinearJunctionDetector _junctions;
+        private int _stability;
 
         public SpatialRiftEngine(NonLinearJunctionDetector junctions)
         {
             _junctions = junctions;
+            _stability = 100; // fully stable at start
         }
 
-        public void Tick()
+        /// <summary>
+        /// Called by UpdateLoop.cs
+        /// </summary>
+        public void Update()
         {
-            if (!_junctions.JunctionOpen)
-                return;
-
-            int roll = Random.Shared.Next(0, 100);
-
-            if (roll < 50)
+            if (_junctions.JunctionOpen)
             {
-                Console.WriteLine("[Realm Rift] Minor spatial tear flickers.");
-            }
-            else if (roll < 85)
-            {
-                Console.WriteLine("[Realm Rift] Rift pulse destabilizes nearby terrain.");
+                // Rift destabilizes when junction is open
+                _stability -= 5;
+                if (_stability < 0) _stability = 0;
+
+                Console.WriteLine($"[Realm Rift] Rift destabilizing. Stability={_stability}");
             }
             else
             {
-                Console.WriteLine("[Realm Rift] *** MAJOR RIFT EVENT: Geometry collapses inward ***");
+                // Rift stabilizes when junction is closed
+                _stability += 3;
+                if (_stability > 100) _stability = 100;
+
+                Console.WriteLine($"[Realm Rift] Rift stabilizing. Stability={_stability}");
             }
+        }
+
+        public int GetStability()
+        {
+            return _stability;
         }
     }
 }

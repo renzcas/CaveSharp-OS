@@ -37,7 +37,10 @@ namespace CaveSharp.WebUI
             _overseer = overseer;
         }
 
-        public void Tick()
+        /// <summary>
+        /// Called by UpdateLoop.cs
+        /// </summary>
+        public void Refresh()
         {
             _tickCount++;
 
@@ -47,9 +50,12 @@ namespace CaveSharp.WebUI
             // CTA
             Console.WriteLine($"CTA Organisms: {_ctaEvolution.TotalOrganisms}");
             Console.WriteLine($"CTA Boss Aggression: {_boss.AggressionLevel}");
+            Console.WriteLine($"CTA Boss Power: {_boss.Power}");
+            Console.WriteLine($"CTA Boss Directive: {_boss.CurrentDirective}");
 
             // Realm
             Console.WriteLine($"Corruption Intensity: {_corruption.SpreadIntensity}");
+            Console.WriteLine($"Corruption Pressure: {_corruption.Pressure}");
             Console.WriteLine($"Junction Open: {_junctions.JunctionOpen}");
 
             // Creatures
@@ -66,6 +72,8 @@ namespace CaveSharp.WebUI
 
             // Pulse indicator
             Console.WriteLine($"Pulse: {( _tickCount % 2 == 0 ? "●" : "○" )}");
+
+            Console.WriteLine("===============================");
         }
     }
 }

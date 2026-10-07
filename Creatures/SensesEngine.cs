@@ -4,12 +4,15 @@ using CaveSharp.Realm;
 
 namespace CaveSharp.Creatures
 {
+    /// <summary>
+    /// Handles creature perception: detecting nearby creatures,
+    /// sensing corruption, reacting to junction instability,
+    /// and triggering fear or aggression responses.
+    /// </summary>
     public class SensesEngine
     {
         private readonly CorruptionMap _corruption;
         private readonly NonLinearJunctionDetector _junctions;
-
-        public int PerceptionRadius { get; } = 5;
 
         public SensesEngine(CorruptionMap corruption, NonLinearJunctionDetector junctions)
         {
@@ -17,35 +20,49 @@ namespace CaveSharp.Creatures
             _junctions = junctions;
         }
 
-        public void Tick(Creature creature, List<Creature> nearbyCreatures)
+        public void Tick(Creature creature, IReadOnlyList<Creature> allCreatures)
         {
             if (creature.Health <= 0)
                 return;
 
-            // Detect corruption intensity
-            if (_corruption.SpreadIntensity > 7)
+            // Sense corruption in the environment
+            float corruptionHere = _corruption.Sample(creature.X, creature.Y);
+            if (corruptionHere > 0.2f)
             {
-                creature.BecomeAfraid("high corruption intensity sensed");
+                creature.CorruptionExposure += corruptionHere * 0.3f;
+                Console.WriteLine($"[Senses] {creature.Name} senses corruption: +{corruptionHere * 0.3f:F2}");
             }
 
-            // Detect dimensional instability
-            if (_junctions.JunctionOpen)
+            // Sense junction instability
+            if (_junctions.JunctionOpen && Random.Shared.Next(0, 100) > 50)
             {
-                creature.BecomeAfraid("dimensional junction instability sensed");
+                creature.BecomeAfraid("dimensional vibrations");
             }
 
-            // Detect nearby creatures
-            foreach (var other in nearbyCreatures)
+            // Sense nearby creatures
+            foreach (var other in allCreatures)
             {
-                if (other == creature)
+                if (other == creature || other.Health <= 0)
                     continue;
 
-                int dx = Math.Abs(other.X - creature.X);
-                int dy = Math.Abs(other.Y - creature.Y);
+                float dx = other.X - creature.X;
+                float dy = other.Y - creature.Y;
+                float dist = MathF.Sqrt(dx * dx + dy * dy);
 
-                if (dx <= PerceptionRadius && dy <= PerceptionRadius)
+                // Close proximity → tension
+                if (dist < 3f)
                 {
-                    Console.WriteLine($"[Senses] {creature.Name} detects {other.Name} nearby.");
+                    creature.IncreaseAggression(1);
+                    Console.WriteLine($"[Senses] {creature.Name} feels tension near {other.Name}");
+                }
+
+                // Very close → fear or aggression spike
+                if (dist < 1.5f)
+                {
+                    if (creature.Aggression < 20)
+                        creature.BecomeAfraid($"close proximity to {other.Name}");
+                    else
+                        creature.IncreaseAggression(3);
                 }
             }
         }
