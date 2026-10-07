@@ -2,68 +2,70 @@ using System;
 
 namespace CaveSharp.Creatures
 {
-    /// <summary>
-    /// Base creature model used throughout CaveSharp-OS.
-    /// Overseer, Factions, Realm, and WebUI all read from this class.
-    /// </summary>
     public class Creature
     {
-        public string Id { get; }
+        // Identity
         public string Name { get; }
 
-        public int Health { get; private set; }
-        public int Aggression { get; private set; }
+        // Biological stats
+        public float Health { get; set; }
+        public float Aggression { get; set; }
+        public float Hunger { get; set; }
+        public float CorruptionExposure { get; set; }
 
-        public int X { get; private set; }
-        public int Y { get; private set; }
+        // Position (required by MovementEngine, SensesEngine, CombatEngine)
+        public float X { get; set; }
+        public float Y { get; set; }
 
-        public bool IsAlive => Health > 0;
+        // Fear system
+        public bool IsAfraid { get; private set; }
 
-        public Creature(string name, int x, int y)
+        public Creature(string name, float health = 100f)
         {
-            Id = Guid.NewGuid().ToString().Substring(0, 8);
             Name = name;
 
-            Health = 100;
-            Aggression = 0;
+            Health = health;
+            Aggression = 0f;
+            Hunger = 0f;
+            CorruptionExposure = 0f;
 
-            X = x;
-            Y = y;
+            X = 0f;
+            Y = 0f;
+
+            IsAfraid = false;
         }
 
-        public void Damage(int amount)
+        public void BecomeAfraid(string reason = "")
         {
-            Health -= amount;
-            if (Health < 0)
-                Health = 0;
-
-            Console.WriteLine($"[Creature] {Name} took {amount} damage. HP={Health}");
+            IsAfraid = true;
+            Console.WriteLine($"[Creature] {Name} becomes afraid. {reason}");
         }
 
-        public void Heal(int amount)
+        public void Tick(float dt)
         {
-            Health += amount;
-            if (Health > 100)
-                Health = 100;
+            // Hunger increases naturally
+            Hunger += dt * 0.5f;
+            if (Hunger > 100f)
+                Hunger = 100f;
 
-            Console.WriteLine($"[Creature] {Name} healed {amount}. HP={Health}");
-        }
+            // Biological decay
+            Health -= dt * 0.1f;
+            if (Health < 0f)
+                Health = 0f;
 
-        public void IncreaseAggression(int amount)
-        {
-            Aggression += amount;
-            if (Aggression > 100)
-                Aggression = 100;
+            // Aggression decay
+            Aggression -= dt * 0.05f;
+            if (Aggression < 0f)
+                Aggression = 0f;
 
-            Console.WriteLine($"[Creature] {Name} aggression increased to {Aggression}");
-        }
+            // Corruption decay
+            CorruptionExposure -= dt * 0.02f;
+            if (CorruptionExposure < 0f)
+                CorruptionExposure = 0f;
 
-        public void Move(int dx, int dy)
-        {
-            X += dx;
-            Y += dy;
-
-            Console.WriteLine($"[Creature] {Name} moved to ({X},{Y})");
+            // Fear resets slowly
+            if (IsAfraid && Aggression < 5f)
+                IsAfraid = false;
         }
     }
 }

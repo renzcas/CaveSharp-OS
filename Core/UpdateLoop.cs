@@ -1,6 +1,6 @@
 using System;
 using System.Threading;
-using CaveSharp.Systems.Combat;
+
 using CaveSharp.CTA;
 using CaveSharp.Realm;
 using CaveSharp.Creatures;
@@ -29,9 +29,9 @@ namespace CaveSharp.Core
 
         // Creature Subsystems
         private readonly BehaviorEngine _behavior;
-        private readonly MovementEngine _movement = new();
+        private readonly MovementEngine _movement;
         private readonly SensesEngine _senses;
-        private readonly CombatEngine _combat = new();
+        private readonly CombatEngine _combat;
         private readonly CreatureManager _creatures;
 
         // Faction Subsystem
@@ -50,7 +50,9 @@ namespace CaveSharp.Core
 
             // Creature wiring
             _behavior = new BehaviorEngine(_corruption, _junctions);
+            _movement = new MovementEngine(_corruption, _junctions);
             _senses = new SensesEngine(_corruption, _junctions);
+            _combat = new CombatEngine();
             _creatures = new CreatureManager(_behavior, _movement, _senses, _combat);
 
             // Sample creatures
@@ -97,7 +99,7 @@ namespace CaveSharp.Core
         public void Start()
         {
             _isRunning = true;
-            Console.WriteLine("[*] CaveSharp-OS Core Engine Initialized with CTA, Realm, Creatures, Factions, MetaAI, WebUI.");
+            Console.WriteLine("[*] CaveSharp-OS Core Engine Initialized.");
 
             int tickCount = 0;
             while (_isRunning && tickCount < 100)
@@ -114,12 +116,11 @@ namespace CaveSharp.Core
 
             float dt = 1f / _tickRate;
 
-            // CTA Systems (no Tick() methods in your real classes)
-            // Use AutoDirective() instead of ExecuteTacticalDirective()
+            // CTA Systems
             string directive = _boss.AutoDirective();
             Console.WriteLine($"[CTA] Boss directive: {directive}");
 
-            // Realm Systems (your real classes do not have Tick())
+            // Realm Systems
             _weather.ShiftClimate();
             _healing.ApplyHealing();
             _corruption.Spread();
@@ -129,13 +130,13 @@ namespace CaveSharp.Core
             // Creatures
             _creatures.Tick(dt);
 
-            // Factions (your real FactionEngine does not have Tick())
+            // Factions
             _factions.ProcessFactionLogic();
 
-            // MetaAI Overseer (your real Overseer does not have Tick())
+            // MetaAI Overseer
             _overseer.Process();
 
-            // WebUI Heartbeat (your real HeartbeatPanel does not have Tick())
+            // WebUI Heartbeat
             _heartbeat.Refresh();
         }
     }

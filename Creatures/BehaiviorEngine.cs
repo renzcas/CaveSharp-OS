@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using CaveSharp.Realm;
 
 namespace CaveSharp.Creatures
 {
@@ -10,8 +10,20 @@ namespace CaveSharp.Creatures
     /// </summary>
     public class BehaviorEngine
     {
+        private readonly CorruptionMap _corruption;
+        private readonly NonLinearJunctionDetector _junctions;
+
+        public BehaviorEngine(CorruptionMap corruption, NonLinearJunctionDetector junctions)
+        {
+            _corruption = corruption;
+            _junctions = junctions;
+        }
+
         public void Tick(Creature creature)
         {
+            if (creature.Health <= 0)
+                return;
+
             // Hunger → aggression
             if (creature.Hunger > 70)
             {
@@ -19,27 +31,27 @@ namespace CaveSharp.Creatures
             }
 
             // Corruption → fear
-            if (creature.CorruptionExposure > 40 && !creature.IsAfraid)
+            if (_corruption.SpreadIntensity > 5 && !creature.IsAfraid)
             {
-                creature.BecomeAfraid("Corruption exposure");
+                creature.BecomeAfraid("corruption spreading");
+            }
+
+            // Junction instability → fear
+            if (_junctions.JunctionOpen && !creature.IsAfraid)
+            {
+                creature.BecomeAfraid("dimensional instability");
             }
 
             // Low health → fear
             if (creature.Health < 30 && !creature.IsAfraid)
             {
-                creature.BecomeAfraid("Critical health");
+                creature.BecomeAfraid("critical health");
             }
 
             // Aggression spikes → reckless behavior
             if (creature.Aggression > 60)
             {
                 Console.WriteLine($"[BehaviorEngine] {creature.Name} enters a reckless state.");
-            }
-
-            // Calm down slowly if safe
-            if (creature.Aggression < 10 && creature.IsAfraid == false)
-            {
-                // mild natural calm
             }
         }
     }

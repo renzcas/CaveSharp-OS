@@ -13,5 +13,8 @@ namespace CaveSharp.Realm
 
         // Optional: region name for debugging or display
         public string Name { get; set; } = "Unnamed Region";
+
+        // REQUIRED by MindWavesRealmHarmonics.cs
+        public float LightShift { get; set; } = 0f;
     }
 }

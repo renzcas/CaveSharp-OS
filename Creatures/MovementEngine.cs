@@ -5,8 +5,8 @@ using CaveSharp.Realm;
 namespace CaveSharp.Creatures
 {
     /// <summary>
-    /// Handles creature movement, fleeing, wandering, and corruption avoidance.
-    /// BehaviorEngine decides emotional state; MovementEngine decides physical motion.
+    /// Handles creature movement influenced by corruption fields,
+    /// fear, aggression, and environmental instability.
     /// </summary>
     public class MovementEngine
     {
@@ -24,43 +24,30 @@ namespace CaveSharp.Creatures
             if (creature.Health <= 0)
                 return;
 
-            float dx = 0;
-            float dy = 0;
+            float baseSpeed = 0.1f;
 
-            // If afraid → flee randomly
-            if (creature.IsAfraid)
+            // Corruption pushes creatures away from hotspots
+            float corruptionLevel = _corruption.Sample(creature.X, creature.Y);
+            if (corruptionLevel > 0.3f)
             {
-                dx = Random.Shared.Next(-2, 3);
-                dy = Random.Shared.Next(-2, 3);
+                creature.BecomeAfraid("Corruption hotspot detected");
+                creature.IncreaseAggression(1);
 
-                Console.WriteLine($"[Movement] {creature.Name} flees to ({creature.X + dx},{creature.Y + dy})");
-            }
-            else
-            {
-                // Wander calmly
-                dx = Random.Shared.Next(-1, 2);
-                dy = Random.Shared.Next(-1, 2);
-
-                Console.WriteLine($"[Movement] {creature.Name} wanders to ({creature.X + dx},{creature.Y + dy})");
+                // Move away from corruption
+                creature.X -= 0.05f * corruptionLevel;
+                creature.Y -= 0.05f * corruptionLevel;
             }
 
-            // Apply movement
-            creature.X += dx;
-            creature.Y += dy;
-
-            // Corruption exposure increases if creature steps into corruption zones
-            float corruptionHere = _corruption.Sample(creature.X, creature.Y);
-            if (corruptionHere > 0.1f)
+            // Junction instability causes erratic movement
+            if (_junctions.JunctionOpen)
             {
-                creature.CorruptionExposure += corruptionHere * 0.5f;
-                Console.WriteLine($"[Movement] {creature.Name} exposed to corruption: +{corruptionHere * 0.5f:F2}");
+                creature.X += (float)(Math.Sin(DateTime.UtcNow.Millisecond) * 0.02f);
+                creature.Y += (float)(Math.Cos(DateTime.UtcNow.Millisecond) * 0.02f);
             }
 
-            // Junction instability causes disorientation
-            if (_junctions.JunctionOpen && Random.Shared.Next(0, 100) > 70)
-            {
-                creature.BecomeAfraid("dimensional instability disorientation");
-            }
+            // Normal wandering
+            creature.X += baseSpeed * 0.5f;
+            creature.Y += baseSpeed * 0.3f;
         }
     }
 }

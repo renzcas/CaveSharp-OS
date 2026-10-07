@@ -5,9 +5,10 @@ using CaveSharp.Realm;
 namespace CaveSharp.Creatures
 {
     /// <summary>
-    /// Handles creature perception: detecting nearby creatures,
-    /// sensing corruption, reacting to junction instability,
-    /// and triggering fear or aggression responses.
+    /// Handles creature perception:
+    /// - Detect corruption hotspots
+    /// - Detect nearby creatures
+    /// - Trigger fear or aggression responses
     /// </summary>
     public class SensesEngine
     {
@@ -25,21 +26,22 @@ namespace CaveSharp.Creatures
             if (creature.Health <= 0)
                 return;
 
-            // Sense corruption in the environment
-            float corruptionHere = _corruption.Sample(creature.X, creature.Y);
-            if (corruptionHere > 0.2f)
+            // === CORRUPTION SENSE ===
+            float corruptionLevel = _corruption.Sample(creature.X, creature.Y);
+
+            if (corruptionLevel > 0.4f)
             {
-                creature.CorruptionExposure += corruptionHere * 0.3f;
-                Console.WriteLine($"[Senses] {creature.Name} senses corruption: +{corruptionHere * 0.3f:F2}");
+                creature.BecomeAfraid("Sensed corruption hotspot");
+                creature.IncreaseAggression(1);
             }
 
-            // Sense junction instability
-            if (_junctions.JunctionOpen && Random.Shared.Next(0, 100) > 50)
+            // === JUNCTION SENSE ===
+            if (_junctions.JunctionOpen)
             {
-                creature.BecomeAfraid("dimensional vibrations");
+                creature.BecomeAfraid("Dimensional instability detected");
             }
 
-            // Sense nearby creatures
+            // === CREATURE PROXIMITY ===
             foreach (var other in allCreatures)
             {
                 if (other == creature || other.Health <= 0)
@@ -49,22 +51,12 @@ namespace CaveSharp.Creatures
                 float dy = other.Y - creature.Y;
                 float dist = MathF.Sqrt(dx * dx + dy * dy);
 
-                // Close proximity → tension
-                if (dist < 3f)
-                {
-                    creature.IncreaseAggression(1);
-                    Console.WriteLine($"[Senses] {creature.Name} feels tension near {other.Name}");
-                }
-
-                // Very close → fear or aggression spike
                 if (dist < 1.5f)
                 {
-                    if (creature.Aggression < 20)
-                        creature.BecomeAfraid($"close proximity to {other.Name}");
-                    else
-                        creature.IncreaseAggression(3);
+                    creature.IncreaseAggression(2);
                 }
             }
         }
     }
 }
+s
