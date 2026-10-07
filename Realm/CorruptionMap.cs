@@ -2,103 +2,51 @@ using System;
 
 namespace CaveSharp.Realm
 {
+    /// <summary>
+    /// Tracks corruption intensity across the world.
+    /// Provides sampling for creature senses and movement.
+    /// </summary>
     public class CorruptionMap
     {
-        // === Core corruption metrics ===
-        public int SpreadIntensity { get; private set; } = 0;
-        public float Pressure { get; private set; } = 0f;
+        // Global corruption pressure
+        public float SpreadIntensity { get; set; } = 0f;
 
-        // === Corruption grid for heatmap ===
-        private readonly float[,] _grid;
-        private readonly int _width;
-        private readonly int _height;
+        // Simple grid model (optional future expansion)
+        private readonly float[,] _grid = new float[32, 32];
 
-        private readonly Random _rng = new Random();
-
-        public CorruptionMap(int width = 16, int height = 8)
-        {
-            _width = width;
-            _height = height;
-            _grid = new float[_width, _height];
-
-            InitializeGrid();
-        }
-
-        private void InitializeGrid()
-        {
-            for (int x = 0; x < _width; x++)
-                for (int y = 0; y < _height; y++)
-                    _grid[x, y] = 0f;
-        }
-
-        /// <summary>
-        /// Called by UpdateLoop.cs
-        /// </summary>
         public void Spread()
         {
-            // SpreadIntensity rises slowly over time
-            SpreadIntensity += 1;
-            if (SpreadIntensity > 100)
-                SpreadIntensity = 100;
-
-            // Random corruption spike in the grid
-            int x = _rng.Next(_width);
-            int y = _rng.Next(_height);
-
-            _grid[x, y] += Pressure * 0.3f;
-            if (_grid[x, y] > 100f)
-                _grid[x, y] = 100f;
-
-            Console.WriteLine($"[Realm Corruption] Spread event. Intensity={SpreadIntensity}, Pressure={Pressure}");
+            // Basic corruption growth
+            SpreadIntensity += 0.2f;
+            if (SpreadIntensity > 100f)
+                SpreadIntensity = 100f;
         }
 
         /// <summary>
-        /// Overseer calls this every tick.
+        /// REQUIRED by MovementEngine and SensesEngine.
+        /// Returns corruption intensity at a given world coordinate.
         /// </summary>
-        public void Decay(float dt)
+        public float Sample(float x, float y)
         {
-            // Pressure naturally decays
-            Pressure -= dt * 0.1f;
-            if (Pressure < 0) Pressure = 0;
+            // Normalize coordinates into grid space
+            int gx = (int)Math.Clamp(x, 0, 31);
+            int gy = (int)Math.Clamp(y, 0, 31);
 
-            // Spread intensity decays slowly
-            SpreadIntensity -= (int)(dt * 0.05f);
-            if (SpreadIntensity < 0) SpreadIntensity = 0;
-
-            // Grid corruption decays
-            for (int x = 0; x < _width; x++)
-            {
-                for (int y = 0; y < _height; y++)
-                {
-                    _grid[x, y] -= dt * 0.2f;
-                    if (_grid[x, y] < 0) _grid[x, y] = 0;
-                }
-            }
+            // Combine global pressure + local grid
+            float local = _grid[gx, gy];
+            return (SpreadIntensity * 0.01f) + local;
         }
 
-        /// <summary>
-        /// Overseer increases corruption pressure when threat rises.
-        /// </summary>
-        public void IncreasePressure()
-        {
-            Pressure += 5f;
-            SpreadIntensity += 2;
-
-            // Randomly intensify grid corruption
-            int x = _rng.Next(_width);
-            int y = _rng.Next(_height);
-
-            _grid[x, y] += Pressure * 0.5f;
-            if (_grid[x, y] > 100f)
-                _grid[x, y] = 100f;
-        }
-
-        /// <summary>
-        /// Overseer sends this to RB-App cockpit.
-        /// </summary>
         public float[,] GetGrid()
         {
             return _grid;
+        }
+
+        public void IncreasePressure()
+        {
+            SpreadIntensity += 5f;
+            if (SpreadIntensity > 100f)
+                SpreadIntensity = 100f;
         }
     }
 }

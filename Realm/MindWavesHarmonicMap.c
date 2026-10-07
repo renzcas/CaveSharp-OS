@@ -1,24 +1,36 @@
-using CaveSharp.Core;
+using System;
 
 namespace CaveSharp.Realm
 {
-    public class MindWavesHarmonicMap
+    /// <summary>
+    /// Computes harmonic resonance, ambience shifts,
+    /// and light distortion for RealmRegion objects.
+    /// </summary>
+    public class MindWavesRealmHarmonics
     {
-        private readonly Kernel kernel;
-
-        public MindWavesHarmonicMap(Kernel kernel)
+        public void Process(RealmRegion region)
         {
-            this.kernel = kernel;
-        }
+            // Base harmonic oscillation
+            float t = (float)(DateTime.UtcNow.Millisecond / 1000.0);
+            float wave = MathF.Sin(t * 6.28f); // full sine cycle
 
-        public float ComputeRegionHarmonic(RealmRegion region)
-        {
-            float c = kernel.MindWaves.Consciousness;
+            // Harmonic level influenced by resonance
+            region.HarmonicLevel = region.ResonanceFactor * (wave * 50f + 50f);
 
-            // Harmonic intensity is consciousness * region resonance
-            float intensity = c * region.ResonanceFactor;
+            // Light shift reacts to harmonic spikes
+            region.LightShift = region.HarmonicLevel * 0.02f;
 
-            return Math.Clamp(intensity, 0f, 5f);
+            // Ambience transitions
+            if (region.HarmonicLevel < 20)
+                region.Ambience = "Stillness";
+            else if (region.HarmonicLevel < 40)
+                region.Ambience = "Calm";
+            else if (region.HarmonicLevel < 60)
+                region.Ambience = "Flow";
+            else if (region.HarmonicLevel < 80)
+                region.Ambience = "Vivid";
+            else
+                region.Ambience = "Resonant";
         }
     }
 }

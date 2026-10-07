@@ -1,51 +1,44 @@
-using System;
 using CaveSharpOS.Systems.Mythic;
-using CaveSharpOS.Systems.World;
-using CaveSharpOS.Systems.Interaction;
+using CaveSharpOS.Personas;
+using CaveSharpOS.Time;
 
 namespace CaveSharpOS.Core
 {
+    /// <summary>
+    /// Central wiring hub for all CaveSharp-OS subsystems.
+    /// Every engine is instantiated and exposed here.
+    /// KernelPulseLoop calls into this binder each tick.
+    /// </summary>
     public class SystemBinder
     {
-        public MythEngine Myth { get; private set; }
+        // Mythic subsystem engines
         public ArchetypeEngine Archetypes { get; private set; }
-        public MythCycleEngine Cycles { get; private set; }
-        public SymbolicDynamicsEngine Symbols { get; private set; }
+        public CycleEngine Cycles { get; private set; }
+        public SymbolEngine Symbols { get; private set; }
         public MythicLawEngine Laws { get; private set; }
         public MythicMemoryEngine Memory { get; private set; }
-        public MythicNarrativeEngine Narrative { get; private set; }
+        public MythicNarrativeEngine Myth { get; private set; }
 
-        public EcologyEngine Ecology { get; private set; }
-        public WeatherEngine Weather { get; private set; }
-        public MapEngine Map { get; private set; }
-
+        // Persona subsystem engines
         public PersonaEngine Persona { get; private set; }
         public DialogueEngine Dialogue { get; private set; }
-        public FactionEngine Factions { get; private set; }
+
+        // Time subsystem engine
         public EventEngine Events { get; private set; }
 
-        public void Initialize()
+        public SystemBinder()
         {
-            // Mythic subsystem
-            Myth = new MythEngine();
+            // Instantiate all engines
             Archetypes = new ArchetypeEngine();
-            Cycles = new MythCycleEngine();
-            Symbols = new SymbolicDynamicsEngine();
+            Cycles = new CycleEngine();
+            Symbols = new SymbolEngine();
             Laws = new MythicLawEngine();
             Memory = new MythicMemoryEngine();
-            Narrative = new MythicNarrativeEngine();
+            Myth = new MythicNarrativeEngine();
 
-            Narrative.Inject(Myth, Archetypes, Cycles, Symbols, Laws, Memory);
-
-            // World subsystem
-            Ecology = new EcologyEngine();
-            Weather = new WeatherEngine();
-            Map = new MapEngine();
-
-            // Interaction subsystem
             Persona = new PersonaEngine();
             Dialogue = new DialogueEngine();
-            Factions = new FactionEngine();
+
             Events = new EventEngine();
         }
     }

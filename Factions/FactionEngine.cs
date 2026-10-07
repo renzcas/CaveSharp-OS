@@ -5,6 +5,10 @@ using CaveSharp.Realm;
 
 namespace CaveSharp.Factions
 {
+    /// <summary>
+    /// Handles faction influence, corruption pressure,
+    /// member behavior, and world‑state alignment.
+    /// </summary>
     public class FactionEngine
     {
         private readonly CorruptionMap _corruption;
@@ -21,47 +25,40 @@ namespace CaveSharp.Factions
         public void RegisterFaction(Faction faction)
         {
             _factions.Add(faction);
-            Console.WriteLine($"[FactionEngine] Registered faction: {faction.Name}");
         }
 
         public IReadOnlyList<Faction> GetAll() => _factions;
 
-        public void Tick()
+        /// <summary>
+        /// REQUIRED by UpdateLoop.cs
+        /// </summary>
+        public void ProcessFactionLogic()
         {
             foreach (var faction in _factions)
             {
-                // Corruption affects faction stability
-                if (_corruption.SpreadIntensity > 6)
-                {
-                    faction.AdjustInfluence(-1);
-                    Console.WriteLine($"[Faction] {faction.Name} loses stability due to corruption.");
-                }
+                float influence = faction.Influence;
 
-                // Dimensional instability affects influence
+                // Corruption reduces influence
+                influence -= _corruption.SpreadIntensity * 0.01f;
+
+                // Junction instability reduces influence
                 if (_junctions.JunctionOpen)
+                    influence -= 2f;
+
+                // Members with low health reduce influence
+                foreach (var member in faction.Members)
                 {
-                    faction.AdjustInfluence(-2);
-                    Console.WriteLine($"[Faction] {faction.Name} destabilized by junction anomaly.");
+                    if (member.Health < 40)
+                        influence -= 0.5f;
                 }
 
-                // Natural growth
-                faction.AdjustInfluence(Random.Shared.Next(0, 2));
-            }
+                // Clamp
+                if (influence < 0) influence = 0;
+                if (influence > 100) influence = 100;
 
-            // Faction conflict check
-            if (_factions.Count > 1)
-            {
-                var f1 = _factions[0];
-                var f2 = _factions[1];
+                faction.Influence = influence;
 
-                if (f1.Influence > f2.Influence + 5)
-                {
-                    Console.WriteLine($"[FactionConflict] {f1.Name} dominates {f2.Name}.");
-                }
-                else if (f2.Influence > f1.Influence + 5)
-                {
-                    Console.WriteLine($"[FactionConflict] {f2.Name} dominates {f1.Name}.");
-                }
+                Console.WriteLine($"[FactionEngine] {faction.Name} influence={faction.Influence}");
             }
         }
     }

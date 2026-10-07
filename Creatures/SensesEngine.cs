@@ -59,4 +59,3 @@ namespace CaveSharp.Creatures
         }
     }
 }
-s
