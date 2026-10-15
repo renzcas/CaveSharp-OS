@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using System.Text.Json;
 using CaveSharp.CTA;
 using CaveSharp.Realm;
 using CaveSharp.Creatures;
@@ -21,7 +22,7 @@ namespace CaveSharp.MetaAI
         private readonly WebSocketServer _telemetry;
         private readonly CTACommandServer _ctaCommands;
 
-        public int GlobalThreatLevel { get; private set; } = 0;
+        public float GlobalThreatLevel { get; private set; } = 0;
 
         public Overseer(
             CTAEvolutionEngine ctaEvolution,
@@ -52,7 +53,7 @@ namespace CaveSharp.MetaAI
         /// </summary>
         public void Process()
         {
-            int threat = 0;
+            float threat = 0;
 
             // CTA threat
             threat += _ctaEvolution.TotalOrganisms * 2;
@@ -123,7 +124,7 @@ namespace CaveSharp.MetaAI
             var creatureSnapshot = _creatures.GetSnapshot();
             var corruptionGrid = _corruption.GetGrid();
 
-            string json = System.Text.Json.JsonSerializer.Serialize(new
+            string json = JsonSerializer.Serialize(new
             {
                 threat = GlobalThreatLevel,
                 cta = _boss.AggressionLevel,

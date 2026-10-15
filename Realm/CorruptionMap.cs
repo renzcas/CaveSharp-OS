@@ -10,6 +10,7 @@ namespace CaveSharp.Realm
     {
         // Global corruption pressure
         public float SpreadIntensity { get; set; } = 0f;
+        public float Pressure => SpreadIntensity;
 
         // Simple grid model (optional future expansion)
         private readonly float[,] _grid = new float[32, 32];

@@ -5,8 +5,10 @@ namespace CaveSharp.Creatures
         public string Name { get; set; }
         public float Health { get; set; }
         public float Aggression { get; set; }
+        public float Hunger { get; set; }
         public float X { get; set; }
         public float Y { get; set; }
+        public bool IsAfraid { get; set; }
         public float CorruptionExposure { get; set; }
     }
 }

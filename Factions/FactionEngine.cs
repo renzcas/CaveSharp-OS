@@ -56,7 +56,7 @@ namespace CaveSharp.Factions
                 if (influence < 0) influence = 0;
                 if (influence > 100) influence = 100;
 
-                faction.Influence = influence;
+                faction.SetInfluence(influence);
 
                 Console.WriteLine($"[FactionEngine] {faction.Name} influence={faction.Influence}");
             }

@@ -7,6 +7,7 @@ using CaveSharp.Creatures;
 using CaveSharp.Factions;
 using CaveSharp.MetaAI;
 using CaveSharp.WebUI;
+using CaveSharpOS.Systems;
 
 namespace CaveSharp.Core
 {
@@ -42,6 +43,7 @@ namespace CaveSharp.Core
 
         // WebUI Heartbeat
         private readonly HeartbeatPanel _heartbeat;
+        private readonly StateLogger _stateLogger = new();
 
         public UpdateLoop()
         {
@@ -104,13 +106,12 @@ namespace CaveSharp.Core
             int tickCount = 0;
             while (_isRunning && tickCount < 100)
             {
-                Tick();
-                tickCount++;
+                Tick(++tickCount);
                 Thread.Sleep(1000 / _tickRate);
             }
         }
 
-        private void Tick()
+        private void Tick(int tick)
         {
             Console.WriteLine($"\n[Tick] Engine state updated at {DateTime.UtcNow}");
 
@@ -135,6 +136,18 @@ namespace CaveSharp.Core
 
             // MetaAI Overseer
             _overseer.Process();
+
+            _stateLogger.Log(tick, new
+            {
+                CtaOrganisms = _ctaEvolution.TotalOrganisms,
+                BossAggression = _boss.AggressionLevel,
+                BossPower = _boss.Power,
+                CorruptionIntensity = _corruption.SpreadIntensity,
+                JunctionOpen = _junctions.JunctionOpen,
+                CreatureCount = _creatures.GetAll().Count,
+                FactionCount = _factions.GetAll().Count,
+                GlobalThreatLevel = _overseer.GlobalThreatLevel
+            }, nameof(UpdateLoop));
 
             // WebUI Heartbeat
             _heartbeat.Refresh();

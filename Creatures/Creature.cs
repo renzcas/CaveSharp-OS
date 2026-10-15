@@ -41,6 +41,14 @@ namespace CaveSharp.Creatures
             Console.WriteLine($"[Creature] {Name} becomes afraid. {reason}");
         }
 
+        public void IncreaseAggression(float amount)
+        {
+            if (!float.IsFinite(amount))
+                throw new ArgumentOutOfRangeException(nameof(amount), "Aggression change must be finite.");
+
+            Aggression = Math.Clamp(Aggression + amount, 0f, 100f);
+        }
+
         public void Tick(float dt)
         {
             // Hunger increases naturally

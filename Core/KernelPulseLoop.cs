@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 
 namespace CaveSharpOS.Core
 {
@@ -27,7 +28,6 @@ namespace CaveSharpOS.Core
                 binder.Symbols.Update(dt);
                 binder.Laws.Update(dt);
                 binder.Memory.Update(dt);
-                binder.Narrative.Update(dt);
 
                 // World subsystem
                 binder.Ecology.Update(dt);
@@ -41,6 +41,7 @@ namespace CaveSharpOS.Core
                 binder.Events.Update(dt);
 
                 // TODO: Add Physics, Audio, Input, Agents, CyberLab
+                Thread.Sleep(16);
             }
         }
 

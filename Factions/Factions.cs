@@ -7,7 +7,7 @@ namespace CaveSharp.Factions
     public class Faction
     {
         public string Name { get; }
-        public int Influence { get; private set; } = 10;
+        public float Influence { get; private set; } = 10f;
 
         private readonly List<Creature> _members = new();
 
@@ -26,8 +26,17 @@ namespace CaveSharp.Factions
         {
             Influence += amount;
             if (Influence < 0) Influence = 0;
+            if (Influence > 100) Influence = 100;
 
             Console.WriteLine($"[Faction] {Name} influence now {Influence}.");
+        }
+
+        public void SetInfluence(float influence)
+        {
+            if (!float.IsFinite(influence))
+                throw new ArgumentOutOfRangeException(nameof(influence), "Influence must be finite.");
+
+            Influence = Math.Clamp(influence, 0f, 100f);
         }
 
         public IReadOnlyList<Creature> Members => _members;

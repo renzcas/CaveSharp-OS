@@ -1,6 +1,8 @@
 using CaveSharpOS.Systems.Mythic;
+using CaveSharpOS.Systems.World;
 using CaveSharpOS.Personas;
 using CaveSharpOS.Time;
+using FactionTickEngine = CaveSharpOS.Systems.Interaction.FactionEngine;
 
 namespace CaveSharpOS.Core
 {
@@ -23,6 +25,14 @@ namespace CaveSharpOS.Core
         public PersonaEngine Persona { get; private set; }
         public DialogueEngine Dialogue { get; private set; }
 
+        // World subsystem engines
+        public EcologyEngine Ecology { get; private set; }
+        public WeatherEngine Weather { get; private set; }
+        public MapEngine Map { get; private set; }
+
+        // Interaction subsystem engines
+        public FactionTickEngine Factions { get; private set; }
+
         // Time subsystem engine
         public EventEngine Events { get; private set; }
 
@@ -39,6 +49,10 @@ namespace CaveSharpOS.Core
             Persona = new PersonaEngine();
             Dialogue = new DialogueEngine();
 
+            Ecology = new EcologyEngine();
+            Weather = new WeatherEngine();
+            Map = new MapEngine();
+            Factions = new FactionTickEngine();
             Events = new EventEngine();
         }
     }
